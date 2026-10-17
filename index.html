@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Kebijakan Zero-Cache untuk Web Edukasi / Interaktif -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Panduan Tugas Mandiri: Membangun Game 2D Arcade dengan Hermes Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Styling Dasar Presentasi */
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      user-select: text;
+    }
+    
+    .slide-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Scrollbar halus */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Print styling: Menjadikan semua slide tercetak berurutan sebagai handout PDF */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .slide-container {
+        min-height: auto !important;
+      }
+      .slide {
+        display: block !important;
+        opacity: 1 !important;
+        transform: none !important;
+        page-break-after: always;
+        break-after: page;
+        padding: 2.5rem 1rem !important;
+        border-bottom: 2px dashed #cbd5e1;
+      }
+      .print-dark-fix {
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+      }
+      .print-text-fix {
+        color: #0f172a !important;
+      }
+      .print-sub-fix {
+        color: #475569 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header Navigasi & Progres -->
+  <header class="no-print sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 md:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/25 text-sm">
+        AI
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-2">
+          Ekskul AI Coder <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium">Tugas Mandiri</span>
+        </h1>
+        <p class="text-xs text-slate-400 hidden sm:block">Membangun Game 2D Arcade dengan Hermes Agent (Step 5)</p>
+      </div>
+    </div>
+
+    <!-- Kontrol Tengah (Nomor Slide & Navigasi Cepat) -->
+    <div class="flex items-center space-x-2">
+      <span id="slideCounter" class="text-xs font-mono font-medium text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-md border border-slate-700/60">
+        Slide 1 / 11
+      </span>
+      <button onclick="toggleTOC()" class="text-xs font-medium px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Daftar Isi">
+        📋 Daftar Slide
+      </button>
+      <button onclick="toggleFullscreen()" class="text-xs font-medium px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition hidden sm:inline-block" title="Layar Penuh (F)">
+        ⛶ Layar Penuh
+      </button>
+      <button onclick="window.print()" class="text-xs font-medium px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-sm" title="Cetak / Unduh PDF">
+        🖨️ Cetak PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- Bar Progres Tipis di Atas -->
+  <div class="no-print w-full bg-slate-900 h-1">
+    <div id="progressBar" class="bg-indigo-500 h-1 transition-all duration-300 ease-out" style="width: 10%;"></div>
+  </div>
+
+  <!-- Modal Menu Daftar Isi (TOC) -->
+  <div id="tocModal" class="no-print fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl overflow-y-auto max-h-[85vh]">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          📑 Daftar Pembahasan Slide
+        </h2>
+        <button onclick="toggleTOC()" class="text-slate-400 hover:text-white p-1 rounded-lg">✕</button>
+      </div>
+      <div class="grid grid-cols-1 gap-2 mt-4 text-sm font-medium" id="tocList">
+        <!-- Generasi JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Wadah Utama Slide (Slide Deck) -->
+  <main class="slide-container flex-grow max-w-5xl mx-auto w-full p-4 md:p-8 flex items-center justify-center">
+
+    <!-- ==========================================
+         SLIDE 1: COVER & PENGENALAN TUGAS
+         ========================================== -->
+    <section class="slide active w-full flex-col justify-center print-dark-fix" data-slide="1" data-title="Pengantar Misi Mandiri">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden print-dark-fix">
+        <div class="absolute -top-24 -right-24 w-80 h-80 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex items-center gap-2 mb-4">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-semibold uppercase tracking-wider">
+            Misi Mandiri Ekskul AI Coder
+          </span>
+          <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
+            Model: Step 5 Preview (Free)
+          </span>
+        </div>
+
+        <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-4 leading-tight print-text-fix">
+          Membangun Game 2D Arcade Interaktif dengan <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-sky-300">Hermes Agent</span>
+        </h2>
+
+        <p class="text-slate-300 text-base md:text-lg mb-8 leading-relaxed max-w-3xl print-sub-fix">
+          Tugas ini dikerjakan secara mandiri tanpa pendampingan tatap muka guru. Anda akan berperan sebagai <strong>AI Lead Engineer</strong> yang mengarahkan <em>autonomous AI agent</em> (Hermes Desktop) untuk merancang, memprogram, dan menyempurnakan sebuah game web 2D arcade berkualitas tinggi.
+        </p>
+
+        <!-- 3 Pilar Instruksi -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 print-dark-fix">
+            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-sm mb-3">1</div>
+            <h3 class="text-sm font-bold text-white mb-1 print-text-fix">Setup Hermes Desktop</h3>
+            <p class="text-xs text-slate-400 leading-normal print-sub-fix">Hubungkan akun Google di Nous Portal, unduh Hermes Desktop, lalu pilih model <code>Step 5 Preview:Free</code>.</p>
+          </div>
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 print-dark-fix">
+            <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-sm mb-3">2</div>
+            <h3 class="text-sm font-bold text-white mb-1 print-text-fix">Aturan Baku AGENTS.md</h3>
+            <p class="text-xs text-slate-400 leading-normal print-sub-fix">Salin aturan baku ke folder proyek Anda agar AI wajib mematuhi standar Vanilla JS, LocalStorage, dan SFX.</p>
+          </div>
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 print-dark-fix">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm mb-3">3</div>
+            <h3 class="text-sm font-bold text-white mb-1 print-text-fix">Eksplorasi Kreatif</h3>
+            <p class="text-xs text-slate-400 leading-normal print-sub-fix">Pilih tema game favorit (Ular, Tangkap Objek, Hindari Meteor, dll.) lalu uji langsung di Google Chrome.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-800/80 text-xs text-slate-400">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Gunakan tombol panah keyboard <strong>[ → ]</strong> atau tombol di bawah untuk berpindah slide</span>
+          </div>
+          <span class="font-mono text-slate-500">Estimasi Praktik: 60 - 90 Menit</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 2: LANGKAH 1 — SETUP NOUS PORTAL
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="2" data-title="1. Akun Nous Portal">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            Langkah 1 dari 9
+          </span>
+          <span class="text-xs text-slate-400 font-mono">portal.nousresearch.com</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 print-text-fix">
+          Membuat Akun di Nous Portal (Google Sign-In)
+        </h2>
+        <p class="text-slate-300 text-sm mb-6 print-sub-fix">
+          Akun Nous Portal diperlukan untuk mengaktifkan Hermes Agent dan mengakses model <strong>Step 5 Preview</strong> secara gratis.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <!-- Panduan Teks Ringkas -->
+          <div class="lg:col-span-6 space-y-4 text-sm text-slate-300 print-sub-fix">
+            <div class="flex items-start gap-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/70 print-dark-fix">
+              <span class="w-6 h-6 rounded-full bg-indigo-600/30 text-indigo-400 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">1</span>
+              <div>
+                <strong class="text-white block mb-0.5 print-text-fix">Buka Portal Resmi:</strong>
+                Kunjungi tautan <a href="https://portal.nousresearch.com" target="_blank" class="text-indigo-400 underline font-mono text-xs">https://portal.nousresearch.com</a> di browser Anda.
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/70 print-dark-fix">
+              <span class="w-6 h-6 rounded-full bg-indigo-600/30 text-indigo-400 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">2</span>
+              <div>
+                <strong class="text-white block mb-0.5 print-text-fix">Klik Tombol Pendaftaran:</strong>
+                Klik tombol biru <strong>"CREATE ACCOUNT"</strong> di tengah layar atau bilah navigasi kiri.
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/70 print-dark-fix">
+              <span class="w-6 h-6 rounded-full bg-indigo-600/30 text-indigo-400 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">3</span>
+              <div>
+                <strong class="text-white block mb-0.5 print-text-fix">Sambungkan Akun Google:</strong>
+                Pilih opsi <strong>"Continue with Google"</strong> dan gunakan akun Google aktif Anda. Proses ini otomatis dan langsung aktif.
+              </div>
+            </div>
+
+            <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 flex items-center gap-2">
+              <span class="text-base">💡</span>
+              <span><strong>Catatan Penting:</strong> Layanan model <code>Step 5 Preview:Free</code> tidak memerlukan input kartu kredit. Cukup login dan akun Anda siap digunakan.</span>
+            </div>
+          </div>
+
+          <!-- Preview Screenshot dengan Fitur Klik Zoom -->
+          <div class="lg:col-span-6">
+            <div class="relative group cursor-pointer rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 shadow-xl" onclick="openLightbox('assets/nous-portal.png', 'Tampilan Portal Nous Research untuk Pembuatan Akun')">
+              <img src="assets/nous-portal.png" alt="Portal Nous Research" class="w-full h-auto object-cover transform group-hover:scale-[1.02] transition duration-300" />
+              <div class="absolute inset-0 bg-indigo-900/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center backdrop-blur-[2px]">
+                <span class="px-3 py-1.5 rounded-lg bg-slate-900/90 text-white text-xs font-semibold shadow-lg border border-slate-700">
+                  🔍 Klik untuk Memperbesar Gambar
+                </span>
+              </div>
+              <div class="absolute bottom-2 left-2 right-2 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
+                <span>Titik Klik: Tombol <strong>CREATE ACCOUNT</strong></span>
+                <span class="text-indigo-400 font-mono text-[10px]">Tangkapan Layar Resmi</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 3: LANGKAH 2 — UNDUH & PASANG HERMES
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="3" data-title="2. Pasang Hermes Desktop">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            Langkah 2 dari 9
+          </span>
+          <span class="text-xs text-slate-400 font-mono">hermes-agent.nousresearch.com</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 print-text-fix">
+          Mengunduh & Memasang Hermes Desktop
+        </h2>
+        <p class="text-slate-300 text-sm mb-6 print-sub-fix">
+          Hermes Desktop adalah aplikasi autonomous AI agent yang bekerja langsung mengelola berkas dan menulis kode di komputer Anda.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-6 space-y-4">
+            <!-- Pilihan Sistem Operasi -->
+            <div class="bg-slate-950/70 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+              <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>🪟</span> Untuk Pengguna Windows
+              </h3>
+              <p class="text-xs text-slate-300 mb-2">Buka <strong>PowerShell</strong> (Run as Administrator) lalu salin dan jalankan perintah instalasi satu baris:</p>
+              <div class="relative flex items-center">
+                <input type="text" readonly value="iex (irm https://hermes-agent.nousresearch.com/install.ps1)" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs font-mono text-indigo-300 pr-20 select-all" id="winInstallCmd" />
+                <button onclick="copyToClipboard('iex (irm https://hermes-agent.nousresearch.com/install.ps1)', 'btnCopyWin')" id="btnCopyWin" class="absolute right-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-medium transition">
+                  Salin
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-slate-950/70 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+              <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>🍎</span> Untuk Pengguna macOS
+              </h3>
+              <p class="text-xs text-slate-300 mb-2">Klik tombol <strong>"Download for macOS"</strong> di web, buka file <code>.dmg</code>, lalu seret ikon <strong>Hermes</strong> ke folder <strong>Applications</strong>.</p>
+              <div class="relative flex items-center">
+                <input type="text" readonly value="curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs font-mono text-indigo-300 pr-20 select-all" id="macInstallCmd" />
+                <button onclick="copyToClipboard('curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash', 'btnCopyMac')" id="btnCopyMac" class="absolute right-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-medium transition">
+                  Salin
+                </button>
+              </div>
+            </div>
+
+            <div class="text-xs text-slate-400 flex items-center gap-2">
+              <span>🚀</span>
+              <span>Setelah instalasi selesai, buka aplikasi <strong>Hermes</strong> dari menu aplikasi Anda.</span>
+            </div>
+          </div>
+
+          <div class="lg:col-span-6">
+            <div class="relative group cursor-pointer rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 shadow-xl" onclick="openLightbox('assets/hermes-website.png', 'Halaman Unduh Hermes Desktop Resmi')">
+              <img src="assets/hermes-website.png" alt="Situs Unduh Hermes Agent" class="w-full h-auto object-cover transform group-hover:scale-[1.02] transition duration-300" />
+              <div class="absolute inset-0 bg-indigo-900/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center backdrop-blur-[2px]">
+                <span class="px-3 py-1.5 rounded-lg bg-slate-900/90 text-white text-xs font-semibold shadow-lg border border-slate-700">
+                  🔍 Klik untuk Memperbesar Gambar
+                </span>
+              </div>
+              <div class="absolute bottom-2 left-2 right-2 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
+                <span>Tombol: <strong>DOWNLOAD FOR MACOS / WINDOWS</strong></span>
+                <span class="text-indigo-400 font-mono text-[10px]">Tangkapan Layar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 4: LANGKAH 3 — SIAPKAN FOLDER PROYEK
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="4" data-title="3. Folder Kerja Proyek">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            Langkah 3 dari 9
+          </span>
+          <span class="text-xs text-slate-400 font-mono">Workspace Directory</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 print-text-fix">
+          Membuat & Mengarahkan Folder Proyek Game
+        </h2>
+        <p class="text-slate-300 text-sm mb-6 print-sub-fix">
+          Hermes Agent membutuhkan satu folder khusus di komputer Anda agar seluruh file game tersimpan rapi di satu tempat.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Instruksi Langkah -->
+          <div class="space-y-4 text-sm text-slate-300 print-sub-fix">
+            <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+              <h3 class="font-bold text-white mb-2 flex items-center gap-2 print-text-fix">
+                <span class="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center text-xs">A</span>
+                Buat Folder Baru di Laptop
+              </h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Buka File Explorer (Windows) atau Finder (macOS). Buat sebuah folder baru bernama:
+              </p>
+              <div class="mt-2 font-mono text-xs bg-slate-900 border border-slate-700 p-2 rounded-lg text-emerald-400 font-bold">
+                📁 game-arcade-ai
+              </div>
+              <p class="text-[11px] text-slate-400 mt-2">Disarankan diletakkan di dalam folder <code>Documents</code> atau <code>Desktop</code> Anda.</p>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+              <h3 class="font-bold text-white mb-2 flex items-center gap-2 print-text-fix">
+                <span class="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center text-xs">B</span>
+                Arahkan Hermes ke Folder Tersebut
+              </h3>
+              <p class="text-xs text-slate-300 leading-relaxed mb-2">
+                Di jendela Hermes Desktop, Anda dapat memilih folder kerja dengan cara:
+              </p>
+              <ul class="text-xs space-y-1.5 list-disc list-inside text-slate-300">
+                <li>Gunakan menu <strong>Open Workspace / Folder</strong> pada Hermes Desktop.</li>
+                <li><strong>ATAU</strong> seret (*drag and drop*) folder <code>game-arcade-ai</code> langsung ke jendela Hermes.</li>
+                <li><strong>ATAU</strong> sebutkan path folder lengkap pada prompt perintah pertama Anda.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Visualisasi Struktur File Target -->
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between print-dark-fix">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                <span class="text-xs font-mono font-bold text-slate-300 flex items-center gap-2">
+                  <span class="text-amber-400">📂</span> Struktur Berkas Akhir Target
+                </span>
+                <span class="text-[11px] text-slate-500 font-mono">Vanilla Web</span>
+              </div>
+
+              <div class="font-mono text-xs space-y-2 text-slate-300 bg-slate-900/90 p-3.5 rounded-xl border border-slate-800/80">
+                <div class="text-indigo-400 font-bold">📁 game-arcade-ai/</div>
+                <div class="pl-4 text-emerald-400 flex items-center gap-2">
+                  <span>├──</span> <span>📄 AGENTS.md</span> <span class="text-[10px] text-slate-400 font-sans">(Aturan teknis wajib)</span>
+                </div>
+                <div class="pl-4 text-sky-400 flex items-center gap-2">
+                  <span>├──</span> <span>📄 index.html</span> <span class="text-[10px] text-slate-400 font-sans">(Layout & canvas game)</span>
+                </div>
+                <div class="pl-4 text-pink-400 flex items-center gap-2">
+                  <span>├──</span> <span>📄 style.css</span> <span class="text-[10px] text-slate-400 font-sans">(Gaya arcade modern)</span>
+                </div>
+                <div class="pl-4 text-amber-300 flex items-center gap-2">
+                  <span>└──</span> <span>📄 game.js</span> <span class="text-[10px] text-slate-400 font-sans">(Logika, HighScore, Audio)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs text-indigo-300 mt-4">
+              <strong>Tips Mandiri:</strong> Seluruh file kode di atas akan dibuatkan secara otomatis oleh Hermes Agent sesuai instruksi yang kita berikan!
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 5: LANGKAH 4 — ATURAN BAKU AGENTS.MD
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="5" data-title="4. Berkas AGENTS.md">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            Langkah 4 dari 9
+          </span>
+          <span class="text-xs text-slate-400 font-mono">System Prompt Rulebook</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+          <h2 class="text-2xl md:text-3xl font-extrabold text-white print-text-fix">
+            Memasang Dokumen Aturan <span class="text-indigo-400 font-mono">AGENTS.md</span>
+          </h2>
+          <button onclick="copyAgentsMarkdown()" id="btnCopyAgents" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-md">
+            <span>📋</span> <span id="btnCopyAgentsText">Salin Seluruh AGENTS.md</span>
+          </button>
+        </div>
+
+        <p class="text-slate-300 text-sm mb-4 print-sub-fix">
+          Buat file bernama <code>AGENTS.md</code> di dalam folder proyek Anda, lalu tempel isi aturan ini. Hermes Agent akan membaca file ini sebelum mulai menulis kode.
+        </p>
+
+        <!-- Preview Isi AGENTS.md Box -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 overflow-hidden print-dark-fix">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-xs text-slate-400 font-mono">
+            <span>Pratinjau: AGENTS.md (4 Batasan Pokok Game)</span>
+            <span class="text-emerald-400">Wajib Dipatuhi AI</span>
+          </div>
+
+          <div class="space-y-3 text-xs text-slate-300 max-h-56 overflow-y-auto pr-2 font-mono">
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+              <strong class="text-indigo-300 block mb-1">1. Pure Vanilla Web (Zero-Build)</strong>
+              Kode wajib murni HTML5, CSS3, dan JS murni. Game harus langsung bisa dimainkan cukup dengan klik ganda berkas <code>index.html</code> di Google Chrome tanpa install server Node.js.
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+              <strong class="text-emerald-300 block mb-1">2. Penyimpanan Rekor (LocalStorage High Score)</strong>
+              Skor tertinggi wajib tersimpan otomatis di browser menggunakan <code>localStorage.setItem()</code> dan <code>localStorage.getItem()</code>. Rekor tidak boleh hilang saat halaman direfresh!
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+              <strong class="text-sky-300 block mb-1">3. Siklus Layar Game yang Jelas (State Machine)</strong>
+              Memiliki 3 tampilan rapi: Layar Awal (Start Screen + panduan tombol), Layar Bermain (HUD skor berjalan), dan Layar Game Over (skor akhir + tombol "Main Lagi").
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+              <strong class="text-pink-300 block mb-1">4. Efek Suara Mandiri (Web Audio API Synthesizer)</strong>
+              Dilarang menggunakan file mp3 eksternal (rentan error 404). Gunakan native <code>window.AudioContext</code> untuk suara loncat, tangkap poin, dan kalah, lengkap dengan tombol Mute/Unmute.
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
+          <span>💡 <em>Dengan berkas ini, AI tidak akan membuat kode yang salah jalur atau menggunakan framework yang rumit.</em></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 6: LANGKAH 5 — PILIH MODEL STEP 5
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="6" data-title="5. Model Step 5 Preview">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            Langkah 5 dari 9
+          </span>
+          <span class="text-xs text-emerald-400 font-mono font-semibold">Tampilan Langsung Aplikasi</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 print-text-fix">
+          Memilih Model <span class="text-indigo-400 font-mono">Step 5 Preview:Free</span> & Effort <span class="text-sky-400 font-mono">High</span>
+        </h2>
+        <p class="text-slate-300 text-sm mb-6 print-sub-fix">
+          Pastikan Hermes Desktop menggunakan model <strong>Step 5 Preview</strong> dan tingkat daya pikir (<em>Effort</em>) <strong>High</strong> untuk menghasilkan kode game yang matang dan minim bug.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-5 space-y-4 text-sm text-slate-300 print-sub-fix">
+            <div class="bg-slate-950/70 border border-slate-800 p-3.5 rounded-xl print-dark-fix">
+              <span class="text-xs font-mono font-bold text-indigo-400 block mb-1">LANGKAH A:</span>
+              <p class="text-xs">Di bilah status kanan bawah jendela Hermes Agent, klik menu pilihan model AI.</p>
+            </div>
+
+            <div class="bg-slate-950/70 border border-slate-800 p-3.5 rounded-xl print-dark-fix">
+              <span class="text-xs font-mono font-bold text-indigo-400 block mb-1">LANGKAH B:</span>
+              <p class="text-xs">Cari dan klik opsi model: <br><strong class="text-emerald-400 font-mono text-sm">Step 5 Preview:Free</strong></p>
+            </div>
+
+            <div class="bg-slate-950/70 border border-slate-800 p-3.5 rounded-xl print-dark-fix">
+              <span class="text-xs font-mono font-bold text-indigo-400 block mb-1">LANGKAH C:</span>
+              <p class="text-xs">Pada menu <strong>EFFORT</strong> di sebelah kirinya, atur ke level: <br><strong class="text-sky-400 font-mono text-sm">High</strong> (atau Extra High).</p>
+            </div>
+
+            <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-300">
+              ✓ Model ini gratis, sangat cerdas dalam penalaran arsitektur game, dan patuh terhadap instruksi berkas <code>AGENTS.md</code>.
+            </div>
+          </div>
+
+          <div class="lg:col-span-7">
+            <div class="relative group cursor-pointer rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 shadow-xl" onclick="openLightbox('assets/hermes-model-selection.png', 'Tangkapan Layar Pemilihan Model Step 5 Preview:Free di Hermes Desktop')">
+              <img src="assets/hermes-model-selection.png" alt="Pemilihan Model Hermes Agent" class="w-full h-auto object-cover transform group-hover:scale-[1.02] transition duration-300" />
+              <div class="absolute inset-0 bg-indigo-900/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center backdrop-blur-[2px]">
+                <span class="px-3 py-1.5 rounded-lg bg-slate-900/90 text-white text-xs font-semibold shadow-lg border border-slate-700">
+                  🔍 Klik untuk Memperbesar Gambar
+                </span>
+              </div>
+              <div class="absolute bottom-2 left-2 right-2 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
+                <span>Centang: <strong>Step 5 Preview:Free</strong> | Effort: <strong>High</strong></span>
+                <span class="text-emerald-400 font-mono text-[10px]">Tampilan Hermes Agent</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 7: LANGKAH 6 — PILIH TEMA GAME 2D
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="7" data-title="6. Pilihan Tema Game 2D">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-3">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            Langkah 6 dari 9
+          </span>
+          <span class="text-xs text-amber-400 font-mono">Eksplorasi Kreatif</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 print-text-fix">
+          Memilih Ide & Tema Game 2D Arcade
+        </h2>
+        <p class="text-slate-300 text-sm mb-5 print-sub-fix">
+          Siswa bebas memilih <strong>salah satu</strong> tema game di bawah ini (atau membuat tema kreasi sendiri), asalkan tetap mematuhi batasan teknis di <code>AGENTS.md</code>.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Opsi 1 -->
+          <div class="bg-slate-950/70 border border-indigo-500/30 p-4 rounded-2xl hover:border-indigo-500 transition print-dark-fix">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold text-indigo-300 flex items-center gap-2 print-text-fix">
+                <span>🐍</span> 1. Retro Neon Snake
+              </h3>
+              <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded font-mono">Klasik</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed mb-2 print-sub-fix">
+              Kendalikan ular yang memakan item neon. Setiap makan, ular bertambah panjang dan kecepatan meningkat. Menabrak badan sendiri atau dinding = Game Over.
+            </p>
+            <div class="text-[11px] text-slate-400 font-mono">Kontrol: Panah / WASD | HighScore: Panjang & Skor</div>
+          </div>
+
+          <!-- Opsi 2 -->
+          <div class="bg-slate-950/70 border border-sky-500/30 p-4 rounded-2xl hover:border-sky-500 transition print-dark-fix">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold text-sky-300 flex items-center gap-2 print-text-fix">
+                <span>🚀</span> 2. Space Asteroid Dodger
+              </h3>
+              <span class="text-[10px] bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded font-mono">Aksi</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed mb-2 print-sub-fix">
+              Pesawat luar angkasa bergerak ke kiri/kanan untuk menghindari hujan asteroid yang jatuh secara acak. Terdapat item perisai pelindung (*Shield Power-up*).
+            </p>
+            <div class="text-[11px] text-slate-400 font-mono">Kontrol: Kiri/Kanan/Spasi | HighScore: Detik Bertahan & Skor</div>
+          </div>
+
+          <!-- Opsi 3 -->
+          <div class="bg-slate-950/70 border border-emerald-500/30 p-4 rounded-2xl hover:border-emerald-500 transition print-dark-fix">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold text-emerald-300 flex items-center gap-2 print-text-fix">
+                <span>🧺</span> 3. Falling Fruit Catcher
+              </h3>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">Ketangkasan</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed mb-2 print-sub-fix">
+              Gerakkan keranjang untuk menangkap buah/koin yang jatuh dari langit. Jika menangkap bom atau melewatkan 3 buah berharga, permainan berakhir.
+            </p>
+            <div class="text-[11px] text-slate-400 font-mono">Kontrol: Panah Kiri/Kanan | HighScore: Total Poin Tangkapan</div>
+          </div>
+
+          <!-- Opsi 4 -->
+          <div class="bg-slate-950/70 border border-pink-500/30 p-4 rounded-2xl hover:border-pink-500 transition print-dark-fix">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold text-pink-300 flex items-center gap-2 print-text-fix">
+                <span>🕊️</span> 4. Cyber Flappy Bird
+              </h3>
+              <span class="text-[10px] bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded font-mono">Refleks</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed mb-2 print-sub-fix">
+              Tekan Spasi untuk mengepakkan sayap dan menjaga ketinggian karakter agar tidak menabrak pilar pipa rintangan di depan.
+            </p>
+            <div class="text-[11px] text-slate-400 font-mono">Kontrol: Tombol Spasi / Klik | HighScore: Rintangan Terlewati</div>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-400 mt-4 text-center">
+          💡 <em>Tentukan 1 tema sekarang, lalu gunakan pada prompt di slide berikutnya!</em>
+        </p>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 8: LANGKAH 7 — PROMPT KE HERMES
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="8" data-title="7. Prompt Perintah AI">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            Langkah 7 dari 9
+          </span>
+          <span class="text-xs text-slate-400 font-mono">Prompt Engineering</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 print-text-fix">
+          Format Prompt Instruksi ke Hermes Agent
+        </h2>
+        <p class="text-slate-300 text-sm mb-4 print-sub-fix">
+          Ketik atau salin teks prompt di bawah ini ke kotak masukan Hermes Agent. Ganti bagian tema sesuai pilihan Anda.
+        </p>
+
+        <!-- Kotak Prompt Siap Pakai -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 relative print-dark-fix">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+            <span class="text-xs font-mono text-slate-400 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
+              Template Prompt Teruji (Siap Salin)
+            </span>
+            <button onclick="copyPromptText()" id="btnCopyPrompt" class="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center gap-1">
+              <span>📋</span> <span id="btnCopyPromptText">Salin Teks Prompt</span>
+            </button>
+          </div>
+
+          <pre id="promptTemplate" class="text-xs md:text-sm font-mono text-indigo-200 whitespace-pre-wrap leading-relaxed select-all bg-slate-900/90 p-3.5 rounded-xl border border-slate-800">Halo Hermes Agent, saya sedang membangun sebuah game 2D Arcade web dengan tema: [TULIS TEMA ANDA, misal: Retro Snake / Space Dodger / Catching Items].
+
+Bekerjalah di folder proyek ini dan BACA seluruh aturan teknis pada berkas AGENTS.md sebelum mulai coding.
+
+Tugas Anda:
+1. Bangun antarmuka game modern dan terpusat di berkas index.html.
+2. Buat desain CSS bertema arcade yang estetik, rapi, dan responsif di style.css.
+3. Tulis seluruh logika game di game.js dengan fitur wajib:
+   - High Score tersimpan permanen menggunakan browser localStorage.
+   - 3 State layar yang jelas: Start Screen, Playing HUD, dan Game Over Screen (dengan tombol Main Lagi / Restart).
+   - Efek suara audio synthesizer native (Web Audio API) untuk aksi lompat/tangkap, skor poin, dan game over, lengkap dengan tombol Mute/Unmute.
+4. Gunakan relative path (./style.css dan ./game.js) agar kompatibel saat di-hosting di GitHub Pages.
+5. Pastikan game dapat dimainkan dengan kontrol keyboard yang lancar dan bebas error.</pre>
+        </div>
+
+        <div class="mt-4 p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl text-xs text-slate-300 flex items-center justify-between">
+          <span>⚙️ <strong>Proses AI:</strong> Hermes Agent akan membuat berkas <code>index.html</code>, <code>style.css</code>, dan <code>game.js</code> dalam beberapa saat.</span>
+          <span class="text-emerald-400 font-medium">Bebas revisi jika ingin menambah fitur!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 9: LANGKAH 8 — UJI GAME & CHECKLIST
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="9" data-title="8. Pengujian di Browser">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            Langkah 8 dari 9
+          </span>
+          <span class="text-xs text-emerald-400 font-mono">Quality Assurance</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 print-text-fix">
+          Menjalankan & Menguji Game di Browser
+        </h2>
+        <p class="text-slate-300 text-sm mb-5 print-sub-fix">
+          Buka file <code>index.html</code> di Google Chrome untuk menguji fungsionalitas game secara langsung sebelum diunggah.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Cara Buka Game -->
+          <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl space-y-3 print-dark-fix">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 print-text-fix">
+              <span>🌐</span> Cara Menjalankan Game
+            </h3>
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-2">
+              <p><strong>Metode 1 (Paling Mudah):</strong><br>Buka File Explorer / Finder -> Masuk ke folder <code>game-arcade-ai</code> -> Klik ganda pada berkas <strong>index.html</strong> (otomatis terbuka di browser).</p>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-2">
+              <p><strong>Metode 2 (Browser Chrome):</strong><br>Buka Google Chrome -> Tekan pintasan keyboard <code>Ctrl + O</code> (Windows) atau <code>Cmd + O</code> (Mac) -> Pilih <code>index.html</code>.</p>
+            </div>
+          </div>
+
+          <!-- Checklist Pengujian Mandiri Siswa -->
+          <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+            <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2 print-text-fix">
+              <span>✅</span> Checklist Uji Mandiri Siswa
+            </h3>
+            <div class="space-y-2 text-xs text-slate-300" id="testChecklist">
+              <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-900/80 hover:bg-slate-900 cursor-pointer transition">
+                <input type="checkbox" class="mt-0.5 rounded text-indigo-600 focus:ring-0">
+                <span><strong>Start Screen:</strong> Layar awal memuat judul, panduan kontrol, dan rekor High Score.</span>
+              </label>
+              <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-900/80 hover:bg-slate-900 cursor-pointer transition">
+                <input type="checkbox" class="mt-0.5 rounded text-indigo-600 focus:ring-0">
+                <span><strong>Kontrol Lancar:</strong> Karakter merespons tombol keyboard tanpa delay dan tanpa scroll browser.</span>
+              </label>
+              <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-900/80 hover:bg-slate-900 cursor-pointer transition">
+                <input type="checkbox" class="mt-0.5 rounded text-indigo-600 focus:ring-0">
+                <span><strong>LocalStorage Bekerja:</strong> Saat dapat skor baru lalu tab di-refresh (F5), High Score TIDAK kembali ke 0.</span>
+              </label>
+              <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-900/80 hover:bg-slate-900 cursor-pointer transition">
+                <input type="checkbox" class="mt-0.5 rounded text-indigo-600 focus:ring-0">
+                <span><strong>Web Audio SFX:</strong> Terdengar bunyi saat beraksi dan game over, serta tombol mute berfungsi.</span>
+              </label>
+              <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-900/80 hover:bg-slate-900 cursor-pointer transition">
+                <input type="checkbox" class="mt-0.5 rounded text-indigo-600 focus:ring-0">
+                <span><strong>Game Over & Restart:</strong> Layar game over muncul dan tombol "Main Lagi" dapat mereset permainan.</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 10: LANGKAH 9 — PUBLIKASI GITHUB PAGES
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="10" data-title="9. Publikasi GitHub Pages">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            Langkah 9 dari 9
+          </span>
+          <span class="text-xs text-indigo-400 font-mono">github.com & GitHub Pages</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 print-text-fix">
+          Publikasikan Game ke <span class="text-indigo-400 font-mono">GitHub Pages</span>
+        </h2>
+        <p class="text-slate-300 text-sm mb-5 print-sub-fix">
+          Hosting game Anda secara gratis agar dapat diakses publik melalui tautan peramban di laptop maupun smartphone.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <!-- Step 1 -->
+          <div class="bg-slate-950/70 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+            <div class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 font-bold flex items-center justify-center text-xs mb-2">1</div>
+            <h3 class="text-xs font-bold text-white mb-1 print-text-fix">Buat Repo Publik</h3>
+            <p class="text-[11px] text-slate-300 leading-relaxed print-sub-fix">
+              Buka <a href="https://github.com/new" target="_blank" class="text-indigo-400 underline font-mono">github.com/new</a>. Beri nama repositori: <code>game-arcade-ai</code> dan pastikan memilih opsi <strong>Public</strong>.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="bg-slate-950/70 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+            <div class="w-7 h-7 rounded-lg bg-sky-600/30 text-sky-400 font-bold flex items-center justify-center text-xs mb-2">2</div>
+            <h3 class="text-xs font-bold text-white mb-1 print-text-fix">Unggah Berkas Kode</h3>
+            <p class="text-[11px] text-slate-300 leading-relaxed print-sub-fix">
+              Unggah 4 berkas utama (<code>index.html</code>, <code>style.css</code>, <code>game.js</code>, dan <code>AGENTS.md</code>) langsung via web <em>"uploading an existing file"</em> atau lewat git terminal.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="bg-slate-950/70 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+            <div class="w-7 h-7 rounded-lg bg-emerald-600/30 text-emerald-400 font-bold flex items-center justify-center text-xs mb-2">3</div>
+            <h3 class="text-xs font-bold text-white mb-1 print-text-fix">Aktifkan GitHub Pages</h3>
+            <p class="text-[11px] text-slate-300 leading-relaxed print-sub-fix">
+              Buka tab <strong>Settings</strong> repo -> menu <strong>Pages</strong>. Pada <strong>Branch</strong>, pilih <code>main</code> / <code>root</code> lalu klik <strong>Save</strong>. Tunggu 1 menit hingga tautan aktif.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">🔗 Pola Tautan Game Aktif:</span>
+            <code class="bg-slate-900 px-2.5 py-1 rounded-md text-indigo-300 font-mono text-[11px] border border-slate-800">https://[username].github.io/game-arcade-ai/</code>
+          </div>
+          <span class="text-slate-400 text-[11px]">Buka di HP untuk memastikan game berjalan lancar!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 11: PENGUMPULAN & PENILAIAN
+         ========================================== -->
+    <section class="slide w-full flex-col justify-center print-dark-fix" data-slide="11" data-title="10. Pengumpulan WA & Rubrik">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl print-dark-fix">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold uppercase tracking-wider">
+            Tahap Pengumpulan
+          </span>
+          <span class="text-xs text-emerald-400 font-mono font-semibold">Grup WhatsApp AI Coder</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 print-text-fix">
+          Kirimkan Tautan ke Grup WhatsApp <span class="text-emerald-400 font-mono">"AI Coder"</span>
+        </h2>
+        <p class="text-slate-300 text-sm mb-5 print-sub-fix">
+          Setelah game berhasil diuji dan online di GitHub Pages, kirimkan bukti tugas ke grup WhatsApp resmi ekskul.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Format Pesan WhatsApp -->
+          <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl space-y-3 print-dark-fix">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2 print-text-fix">
+                <span>💬</span> Format Pesan WhatsApp
+              </h3>
+              <button onclick="copyWAPlate()" id="btnCopyWA" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold transition flex items-center gap-1">
+                <span>📋</span> <span id="btnCopyWAText">Salin Format Pesan</span>
+              </button>
+            </div>
+
+            <pre id="waTemplate" class="text-xs font-mono text-emerald-200 bg-slate-900/90 p-3 rounded-xl border border-slate-800 leading-relaxed whitespace-pre-wrap select-all">Halo Kak Pembimbing & teman-teman, berikut hasil tugas mandiri AI Coder saya:
+
+Nama: [Tulis Nama Lengkap Siswa]
+Tema Game: [Tulis Tema, misal: Retro Snake / Meteor Dodger]
+Link Repositori: https://github.com/[username]/game-arcade-ai
+Link Game Aktif (Pages): https://[username].github.io/game-arcade-ai/
+
+Status: Seluruh checklist (LocalStorage, SFX, & State Game) telah teruji lancar!</pre>
+          </div>
+
+          <!-- Rubrik Penilaian -->
+          <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+            <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2 print-text-fix">
+              <span>⭐</span> Rubrik Penilaian (Total: 100 Poin)
+            </h3>
+            <div class="space-y-2 text-xs text-slate-300">
+              <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800/80">
+                <span>1. LocalStorage High Score & Web Audio SFX</span>
+                <span class="font-mono font-bold text-emerald-400">35 Poin</span>
+              </div>
+              <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800/80">
+                <span>2. Alur Game Loop (Start / Play / Restart)</span>
+                <span class="font-mono font-bold text-indigo-400">30 Poin</span>
+              </div>
+              <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800/80">
+                <span>3. Kerapian Desain Visual & Responsivitas</span>
+                <span class="font-mono font-bold text-sky-400">20 Poin</span>
+              </div>
+              <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800/80">
+                <span>4. Sukses Online di GitHub Pages & Submit WA</span>
+                <span class="font-mono font-bold text-pink-400">15 Poin</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-5 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/40 to-slate-950/40 border border-emerald-500/30 text-center">
+          <p class="text-xs font-bold text-white">Selamat Berkreasi dan Sukses Membangun Game dengan Hermes Agent!</p>
+          <p class="text-[11px] text-slate-300 mt-0.5">Tunjukkan karya terbaikmu di grup ekskul dan ajak temanmu memecahkan rekor skor tertinggi!</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bar Navigasi Bawah (No Print) -->
+  <footer class="no-print sticky bottom-0 z-40 bg-slate-900/90 backdrop-blur-md border-t border-slate-800 px-4 md:px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <button onclick="prevSlide()" id="btnPrev" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white transition flex items-center gap-1.5 border border-slate-700">
+        ← Sebelumnya
+      </button>
+      <button onclick="nextSlide()" id="btnNext" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white transition flex items-center gap-1.5 shadow-lg shadow-indigo-600/25">
+        Selanjutnya →
+      </button>
+    </div>
+
+    <div class="text-xs text-slate-400 hidden sm:flex items-center gap-4">
+      <span>Pintasan: <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px]">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px]">→</kbd> Navigasi | <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px]">F</kbd> Layar Penuh</span>
+    </div>
+  </footer>
+
+  <!-- Lightbox Modal untuk Memperbesar Gambar -->
+  <div id="lightboxModal" class="no-print fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4" onclick="closeLightbox(event)">
+    <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center">
+      <button onclick="closeLightbox()" class="absolute -top-10 right-0 text-white hover:text-slate-300 text-sm font-semibold flex items-center gap-1">
+        Tutup [Esc] ✕
+      </button>
+      <img id="lightboxImg" src="" alt="Zoom preview" class="max-w-full max-h-[80vh] rounded-2xl shadow-2xl border border-slate-700 object-contain" />
+      <p id="lightboxCaption" class="mt-3 text-xs text-slate-300 text-center font-medium bg-slate-900/80 px-4 py-1.5 rounded-full border border-slate-800"></p>
+    </div>
+  </div>
+
+  <!-- Toast Notifikasi Salin -->
+  <div id="toast" class="no-print fixed bottom-16 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-2xl transition duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+    <span>✓</span> <span id="toastText">Berhasil disalin!</span>
+  </div>
+
+  <!-- Konten AGENTS.md Lengkap untuk Fitur Copy Sekali Klik -->
+  <textarea id="rawAgentsMarkdown" class="hidden"># PANDUAN PENGEMBANGAN GAME ARCADIA (AGENTS.md)
+> Dokumen aturan baku untuk AI Agent (Hermes Agent). AI Agent WAJIB membaca dan mematuhi seluruh batasan teknis di bawah ini saat menyusun atau memodifikasi kode game.
+
+---
+
+## 1. Standar Arsitektur & Teknologi
+- **Bahasa**: Pure Vanilla Web (**HTML5**, **CSS3**, dan **JavaScript ES6+** murni).
+- **Portabilitas & Kompatibilitas GitHub Pages**:
+  - Wajib berjalan mandiri (*zero-build*).
+  - Gunakan *relative path* (`./style.css`, `./game.js`) agar game dapat langsung dimainkan secara lokal (`file://`) maupun setelah di-hosting di **GitHub Pages** (`https://<username>.github.io/<repo>/`).
+- **Struktur Berkas Proyek**:
+  game-arcade-ai/
+  ├── AGENTS.md        # Panduan aturan sistem untuk agen AI (berkas ini)
+  ├── index.html       # Struktur antarmuka (Start screen, Canvas HUD, Game Over modal)
+  ├── style.css        # Desain visual arcade retro-modern yang rapi dan responsif
+  └── game.js          # Seluruh logika permainan, loop animasi, audio synth, dan skor
+
+---
+
+## 2. Fitur Wajib (Core Requirements)
+
+### A. Penyimpanan Skor Tertinggi (LocalStorage High Score)
+1. Gunakan API browser `localStorage` untuk menyimpan dan membaca nilai rekor tertinggi siswa.
+2. Tampilkan nilai rekor tertinggi (*High Score*) di Layar Awal dan HUD saat bermain.
+3. Saat permainan berakhir (*Game Over*):
+   - Jika skor saat ini melebihi rekor sebelumnya, simpan skor baru ke `localStorage`.
+   - Munculkan efek visual atau lencana *"NEW HIGH SCORE!"*.
+4. Pastikan rekor tetap tersimpan utuh meskipun halaman browser di-refresh atau ditutup.
+
+### B. Alur Siklus Permainan (Game State Machine)
+Game wajib memiliki transisi 3 kondisi layar yang jelas dan tidak bertumpuk:
+1. **Layar Awal (Start Screen)**:
+   - Judul game yang menarik dan tema visual yang konsisten.
+   - Nilai High Score saat ini.
+   - Ringkasan kontrol tombol (Keyboard: Panah / WASD / Spasi).
+   - Tombol interaktif **"Mulai Main"** (*Play Game*).
+2. **Layar Bermain (Active Game Play)**:
+   - Area permainan utama (Canvas 2D atau Grid DOM animasi) yang mulus (target 60 FPS).
+   - HUD di bagian atas: Skor Berjalan (*Current Score*), Rekor (*High Score*), Level / Kecepatan / Nyawa.
+   - Tombol jeda (*Pause*) atau kontrol suara (*Mute/Unmute*).
+3. **Layar Akhir (Game Over Screen)**:
+   - Menampilkan skor akhir yang diperoleh pemain.
+   - Menampilkan perbandingan dengan rekor tertinggi.
+   - Tombol **"Main Lagi"** (*Restart / Play Again*) yang langsung mengulang permainan tanpa perlu refresh halaman.
+
+### C. Efek Suara Mandiri (Web Audio API Synthesizer)
+- **DILARANG** mengimpor berkas audio eksternal (`.mp3`, `.wav`) yang berpotensi gagal muat (*404 Not Found*).
+- **WAJIB** membuat synthesizer nada sederhana menggunakan native browser `window.AudioContext` (gelombang sinus/persegi/segitiga):
+  - Suara aksi (lompat / tangkap item / bergerak).
+  - Suara keberhasilan (dapat poin / naik level).
+  - Suara tabrakan / game over.
+- Sediakan tombol **Mute / Unmute** di sudut antarmuka agar suara dapat diaktifkan atau dimatikan oleh pemain.
+
+### D. Kontrol & Responsivitas Tampilan
+- Kontrol keyboard utama: Tombol Panah (Arrow Keys), Spasi (Space), dan WASD.
+- Berikan tombol virtual di layar (D-Pad / Tombol aksi) opsional agar permainan tetap dapat dikendalikan dengan kursor mouse atau sentuhan layar sentuh.
+- Game harus terpusat (*centered layout*), tidak menimbulkan *scroll bar* yang mengganggu saat tombol panah ditekan (`event.preventDefault()` pada tombol game).
+
+---
+
+## 3. Batasan Kreativitas Siswa
+- Siswa bebas menentukan gameplay 2D Arcade (contoh: Petualangan Ular Klasik, Menghindari Meteor Luar Angkasa, Menangkap Buah Jatuh, Lompat Rintangan Flappy, atau Balap Mobil Retro).
+- Segala penambahan fitur unik (misal: power-up, penggantian warna tema karakter, atau tingkat kesulitan dinamis) sangat dianjurkan selama tetap mematuhi batasan teknis di atas.</textarea>
+
+  <!-- Skrip Kontrol Presentasi Interaktif -->
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 11;
+    const slides = document.querySelectorAll('.slide');
+
+    // Inisialisasi Daftar Isi (TOC)
+    function initTOC() {
+      const tocList = document.getElementById('tocList');
+      tocList.innerHTML = '';
+      slides.forEach((slide, idx) => {
+        const slideNum = idx + 1;
+        const title = slide.getAttribute('data-title') || `Slide ${slideNum}`;
+        const item = document.createElement('button');
+        item.className = `w-full text-left px-3 py-2 rounded-xl transition flex items-center justify-between ${slideNum === currentSlide ? 'bg-indigo-600 text-white font-bold' : 'hover:bg-slate-800 text-slate-300'}`;
+        item.innerHTML = `<span><span class="font-mono text-xs opacity-60 mr-2">${slideNum}.</span>${title}</span> <span class="text-xs opacity-40">➔</span>`;
+        item.onclick = () => {
+          goToSlide(slideNum);
+          toggleTOC();
+        };
+        tocList.appendChild(item);
+      });
+    }
+
+    function updateSlideDisplay() {
+      slides.forEach((slide, idx) => {
+        const slideNum = idx + 1;
+        if (slideNum === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Update Counter & Progress
+      document.getElementById('slideCounter').textContent = `Slide ${currentSlide} / ${totalSlides}`;
+      const pct = (currentSlide / totalSlides) * 100;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+
+      // Update State Tombol
+      document.getElementById('btnPrev').disabled = (currentSlide === 1);
+      document.getElementById('btnNext').disabled = (currentSlide === totalSlides);
+
+      // Scroll ke atas dengan halus jika berada di viewport kecil
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Simpan posisi slide di hash URL
+      window.location.hash = `#slide-${currentSlide}`;
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= totalSlides) {
+        currentSlide = n;
+        updateSlideDisplay();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+
+    function toggleTOC() {
+      const modal = document.getElementById('tocModal');
+      initTOC();
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.warn("Fullscreen request error:", err);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Abaikan jika fokus pada input/textarea
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        goToSlide(totalSlides);
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullscreen();
+      } else if (e.key === 'Escape') {
+        closeLightbox();
+        const tocModal = document.getElementById('tocModal');
+        if (!tocModal.classList.contains('hidden')) {
+          toggleTOC();
+        }
+      }
+    });
+
+    // Touch Swipe Support untuk Tablet / Ponsel
+    let touchStartX = 0;
+    let touchEndX = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const threshold = 50;
+      if (touchEndX < touchStartX - threshold) {
+        nextSlide();
+      } else if (touchEndX > touchStartX + threshold) {
+        prevSlide();
+      }
+    }
+
+    // Clipboard Copy Helper
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toastText');
+      toastText.textContent = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2500);
+    }
+
+    function copyToClipboard(text, btnId) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Perintah berhasil disalin!");
+        if (btnId) {
+          const btn = document.getElementById(btnId);
+          const orig = btn.innerText;
+          btn.innerText = "✓ Disalin!";
+          setTimeout(() => { btn.innerText = orig; }, 2000);
+        }
+      }).catch(err => {
+        console.error("Gagal menyalin:", err);
+      });
+    }
+
+    function copyAgentsMarkdown() {
+      const text = document.getElementById('rawAgentsMarkdown').value;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Seluruh isi AGENTS.md tersalin ke Clipboard!");
+        const label = document.getElementById('btnCopyAgentsText');
+        label.textContent = "✓ Berhasil Disalin!";
+        setTimeout(() => {
+          label.textContent = "Salin Seluruh AGENTS.md";
+        }, 2500);
+      });
+    }
+
+    function copyPromptText() {
+      const text = document.getElementById('promptTemplate').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Teks prompt berhasil disalin!");
+        const label = document.getElementById('btnCopyPromptText');
+        label.textContent = "✓ Prompt Disalin!";
+        setTimeout(() => {
+          label.textContent = "Salin Teks Prompt";
+        }, 2500);
+      });
+    }
+
+    function copyWAPlate() {
+      const text = document.getElementById('waTemplate').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Format pesan WhatsApp berhasil disalin!");
+        const label = document.getElementById('btnCopyWAText');
+        label.textContent = "✓ Format Disalin!";
+        setTimeout(() => {
+          label.textContent = "Salin Format Pesan";
+        }, 2500);
+      });
+    }
+
+    // Lightbox Modal
+    function openLightbox(src, caption) {
+      const modal = document.getElementById('lightboxModal');
+      const img = document.getElementById('lightboxImg');
+      const cap = document.getElementById('lightboxCaption');
+      img.src = src;
+      cap.textContent = caption || 'Tangkapan Layar Panduan';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeLightbox(e) {
+      if (!e || e.target.id === 'lightboxModal' || e.target.tagName === 'BUTTON') {
+        const modal = document.getElementById('lightboxModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    // Cek Hash URL saat pertama kali dimuat
+    window.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#slide-')) {
+        const num = parseInt(hash.replace('#slide-', ''), 10);
+        if (!isNaN(num) && num >= 1 && num <= totalSlides) {
+          currentSlide = num;
+        }
+      }
+      updateSlideDisplay();
+      initTOC();
+    });
+  </script>
+</body>
+</html>
