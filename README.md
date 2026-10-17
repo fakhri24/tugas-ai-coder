@@ -37,4 +37,9 @@ Cukup klik ganda pada berkas **`index.html`** untuk membukanya di Google Chrome,
 2. **Penyimpanan Rekor**: Wajib menggunakan browser `localStorage` agar High Score tetap tersimpan saat halaman dimuat ulang.
 3. **State Mesin Game**: Layar Awal (Start Screen) -> Area Main (HUD skor aktif) -> Layar Game Over (dengan tombol Main Lagi).
 4. **Efek Suara Mandiri**: Synthesizer frekuensi audio bawaan via Web Audio API (`window.AudioContext`), dilengkapi tombol toggle Mute/Unmute.
-5. **Model AI**: Model `Step 5 Preview:Free` dengan *Effort* `High` pada aplikasi **Hermes Desktop**.
+5. **Publikasi**: Siswa membuat repo publik di GitHub, mengaktifkan GitHub Pages, lalu mengirim link situs ke grup WhatsApp "AI Coder".
+6. **Model AI**: Model `Step 5 Preview:Free` dengan *Effort* `High` pada aplikasi **Hermes Desktop**.
+
+
+## 🌐 Slide Online
+https://fakhri24.github.io/tugas-ai-coder/

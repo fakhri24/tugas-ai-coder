@@ -124,7 +124,7 @@
         <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-2">
           Ekskul AI Coder <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium">Tugas Mandiri</span>
         </h1>
-        <p class="text-xs text-slate-400 hidden sm:block">Membangun Game 2D Arcade dengan Hermes Agent (Step 5)</p>
+        <p class="text-xs text-slate-400 hidden sm:block">Membangun Game 2D Arcade dengan Hermes Agent (Model: Step 5 Preview)</p>
       </div>
     </div>
 
@@ -207,8 +207,8 @@
           </div>
           <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 print-dark-fix">
             <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm mb-3">3</div>
-            <h3 class="text-sm font-bold text-white mb-1 print-text-fix">Eksplorasi Kreatif</h3>
-            <p class="text-xs text-slate-400 leading-normal print-sub-fix">Pilih tema game favorit (Ular, Tangkap Objek, Hindari Meteor, dll.) lalu uji langsung di Google Chrome.</p>
+            <h3 class="text-sm font-bold text-white mb-1 print-text-fix">Rilis di GitHub Pages</h3>
+            <p class="text-xs text-slate-400 leading-normal print-sub-fix">Pilih tema game favorit, uji di Chrome, publikasikan ke <strong>GitHub Pages</strong>, lalu kirim link ke grup WA <strong>"AI Coder"</strong>.</p>
           </div>
         </div>
 
@@ -320,9 +320,9 @@
                 <span>🪟</span> Untuk Pengguna Windows
               </h3>
               <p class="text-xs text-slate-300 mb-2">Buka <strong>PowerShell</strong> (Run as Administrator) lalu salin dan jalankan perintah instalasi satu baris:</p>
-              <div class="relative flex items-center">
-                <input type="text" readonly value="iex (irm https://hermes-agent.nousresearch.com/install.ps1)" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs font-mono text-indigo-300 pr-20 select-all" id="winInstallCmd" />
-                <button onclick="copyToClipboard('iex (irm https://hermes-agent.nousresearch.com/install.ps1)', 'btnCopyWin')" id="btnCopyWin" class="absolute right-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-medium transition">
+              <div class="flex items-start gap-2">
+                <code id="winInstallCmd" class="flex-1 min-w-0 break-all bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-[11px] font-mono text-indigo-300 select-all">iex (irm https://hermes-agent.nousresearch.com/install.ps1)</code>
+                <button onclick="copyToClipboard('iex (irm https://hermes-agent.nousresearch.com/install.ps1)', 'btnCopyWin')" id="btnCopyWin" class="shrink-0 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition">
                   Salin
                 </button>
               </div>
@@ -333,9 +333,9 @@
                 <span>🍎</span> Untuk Pengguna macOS
               </h3>
               <p class="text-xs text-slate-300 mb-2">Klik tombol <strong>"Download for macOS"</strong> di web, buka file <code>.dmg</code>, lalu seret ikon <strong>Hermes</strong> ke folder <strong>Applications</strong>.</p>
-              <div class="relative flex items-center">
-                <input type="text" readonly value="curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs font-mono text-indigo-300 pr-20 select-all" id="macInstallCmd" />
-                <button onclick="copyToClipboard('curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash', 'btnCopyMac')" id="btnCopyMac" class="absolute right-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-medium transition">
+              <div class="flex items-start gap-2">
+                <code id="macInstallCmd" class="flex-1 min-w-0 break-all bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-[11px] font-mono text-indigo-300 select-all">curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</code>
+                <button onclick="copyToClipboard('curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash', 'btnCopyMac')" id="btnCopyMac" class="shrink-0 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition">
                   Salin
                 </button>
               </div>
@@ -411,7 +411,7 @@
               </p>
               <ul class="text-xs space-y-1.5 list-disc list-inside text-slate-300">
                 <li>Gunakan menu <strong>Open Workspace / Folder</strong> pada Hermes Desktop.</li>
-                <li><strong>ATAU</strong> seret (*drag and drop*) folder <code>game-arcade-ai</code> langsung ke jendela Hermes.</li>
+                <li><strong>ATAU</strong> seret (<em>drag and drop</em>) folder <code>game-arcade-ai</code> langsung ke jendela Hermes.</li>
                 <li><strong>ATAU</strong> sebutkan path folder lengkap pada prompt perintah pertama Anda.</li>
               </ul>
             </div>
@@ -484,7 +484,7 @@
             <span class="text-emerald-400">Wajib Dipatuhi AI</span>
           </div>
 
-          <div class="space-y-3 text-xs text-slate-300 max-h-56 overflow-y-auto pr-2 font-mono">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-[11px] text-slate-300 font-mono">
             <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
               <strong class="text-indigo-300 block mb-1">1. Pure Vanilla Web (Zero-Build)</strong>
               Kode wajib murni HTML5, CSS3, dan JS murni. Game harus langsung bisa dimainkan cukup dengan klik ganda berkas <code>index.html</code> di Google Chrome tanpa install server Node.js.
@@ -612,7 +612,7 @@
               <span class="text-[10px] bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded font-mono">Aksi</span>
             </div>
             <p class="text-xs text-slate-300 leading-relaxed mb-2 print-sub-fix">
-              Pesawat luar angkasa bergerak ke kiri/kanan untuk menghindari hujan asteroid yang jatuh secara acak. Terdapat item perisai pelindung (*Shield Power-up*).
+              Pesawat luar angkasa bergerak ke kiri/kanan untuk menghindari hujan asteroid yang jatuh secara acak. Terdapat item perisai pelindung (<em>Shield Power-up</em>).
             </p>
             <div class="text-[11px] text-slate-400 font-mono">Kontrol: Kiri/Kanan/Spasi | HighScore: Detik Bertahan & Skor</div>
           </div>
@@ -731,10 +731,10 @@ Tugas Anda:
               <span>🌐</span> Cara Menjalankan Game
             </h3>
             <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-2">
-              <p><strong>Metode 1 (Paling Mudah):</strong><br>Buka File Explorer / Finder -> Masuk ke folder <code>game-arcade-ai</code> -> Klik ganda pada berkas <strong>index.html</strong> (otomatis terbuka di browser).</p>
+              <p><strong>Metode 1 (Paling Mudah):</strong><br>Buka File Explorer / Finder → masuk ke folder <code>game-arcade-ai</code> → klik ganda pada berkas <code>index.html</code> (otomatis terbuka di browser).</p>
             </div>
             <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-2">
-              <p><strong>Metode 2 (Browser Chrome):</strong><br>Buka Google Chrome -> Tekan pintasan keyboard <code>Ctrl + O</code> (Windows) atau <code>Cmd + O</code> (Mac) -> Pilih <code>index.html</code>.</p>
+              <p><strong>Metode 2 (Browser Chrome):</strong><br>Buka Google Chrome → tekan <code>Ctrl + O</code> (Windows) atau <code>Cmd + O</code> (Mac) → pilih <code>index.html</code>.</p>
             </div>
           </div>
 
@@ -804,7 +804,7 @@ Tugas Anda:
             <div class="w-7 h-7 rounded-lg bg-sky-600/30 text-sky-400 font-bold flex items-center justify-center text-xs mb-2">2</div>
             <h3 class="text-xs font-bold text-white mb-1 print-text-fix">Unggah Berkas Kode</h3>
             <p class="text-[11px] text-slate-300 leading-relaxed print-sub-fix">
-              Unggah 4 berkas utama (<code>index.html</code>, <code>style.css</code>, <code>game.js</code>, dan <code>AGENTS.md</code>) langsung via web <em>"uploading an existing file"</em> atau lewat git terminal.
+              Unggah 4 berkas utama (<code>index.html</code>, <code>style.css</code>, <code>game.js</code>, dan <code>AGENTS.md</code>) langsung via web (<em>"uploading an existing file"</em>) atau lewat git terminal.
             </p>
           </div>
 
@@ -813,8 +813,40 @@ Tugas Anda:
             <div class="w-7 h-7 rounded-lg bg-emerald-600/30 text-emerald-400 font-bold flex items-center justify-center text-xs mb-2">3</div>
             <h3 class="text-xs font-bold text-white mb-1 print-text-fix">Aktifkan GitHub Pages</h3>
             <p class="text-[11px] text-slate-300 leading-relaxed print-sub-fix">
-              Buka tab <strong>Settings</strong> repo -> menu <strong>Pages</strong>. Pada <strong>Branch</strong>, pilih <code>main</code> / <code>root</code> lalu klik <strong>Save</strong>. Tunggu 1 menit hingga tautan aktif.
+              Buka <strong>Settings</strong> → <strong>Pages</strong>. Pada <strong>Branch</strong>, pilih <code>main</code> / <code>/ (root)</code>, lalu klik <strong>Save</strong>. Tunggu ±1 menit.
             </p>
+          </div>
+        </div>
+
+        <!-- Ilustrasi menu Settings > Pages -->
+        <div class="mb-4 bg-slate-950 border border-slate-800 rounded-2xl p-4 print-dark-fix">
+          <div class="flex items-center justify-between mb-3 text-[11px] font-mono text-slate-400">
+            <span>Ilustrasi: Repo → Settings → Pages → Build and deployment</span>
+            <span class="text-amber-400">Ikuti urutan 1 → 2 → 3</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-3">
+              <div class="text-slate-400 text-[11px] mb-1">Tab repositori</div>
+              <div class="flex gap-1.5 flex-wrap font-mono text-[11px]">
+                <span class="px-2 py-1 rounded bg-slate-800 text-slate-400">Code</span>
+                <span class="px-2 py-1 rounded bg-indigo-600 text-white ring-2 ring-amber-400">① Settings</span>
+              </div>
+            </div>
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-3">
+              <div class="text-slate-400 text-[11px] mb-1">Menu kiri</div>
+              <div class="font-mono text-[11px] space-y-1">
+                <div class="px-2 py-1 rounded text-slate-400">General</div>
+                <div class="px-2 py-1 rounded bg-indigo-600 text-white ring-2 ring-amber-400">② Pages</div>
+              </div>
+            </div>
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-3">
+              <div class="text-slate-400 text-[11px] mb-1">Branch</div>
+              <div class="font-mono text-[11px] flex items-center gap-1.5">
+                <span class="px-2 py-1 rounded border border-slate-600 text-slate-200">main ▾</span>
+                <span class="px-2 py-1 rounded border border-slate-600 text-slate-200">/ (root) ▾</span>
+                <span class="px-2 py-1 rounded bg-emerald-600 text-white ring-2 ring-amber-400">③ Save</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -847,9 +879,9 @@ Tugas Anda:
           Setelah game berhasil diuji dan online di GitHub Pages, kirimkan bukti tugas ke grup WhatsApp resmi ekskul.
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
           <!-- Format Pesan WhatsApp -->
-          <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl space-y-3 print-dark-fix">
+          <div class="md:col-span-7 bg-slate-950/60 border border-slate-800 p-4 rounded-2xl space-y-3 print-dark-fix">
             <div class="flex items-center justify-between">
               <h3 class="text-sm font-bold text-white flex items-center gap-2 print-text-fix">
                 <span>💬</span> Format Pesan WhatsApp
@@ -859,18 +891,18 @@ Tugas Anda:
               </button>
             </div>
 
-            <pre id="waTemplate" class="text-xs font-mono text-emerald-200 bg-slate-900/90 p-3 rounded-xl border border-slate-800 leading-relaxed whitespace-pre-wrap select-all">Halo Kak Pembimbing & teman-teman, berikut hasil tugas mandiri AI Coder saya:
+            <pre id="waTemplate" class="text-[11px] font-mono text-emerald-200 bg-slate-900/90 p-3 rounded-xl border border-slate-800 leading-relaxed whitespace-pre-wrap select-all">Halo Kak Pembimbing & teman-teman, berikut hasil tugas mandiri AI Coder saya:
 
 Nama: [Tulis Nama Lengkap Siswa]
-Tema Game: [Tulis Tema, misal: Retro Snake / Meteor Dodger]
+Tema Game: [Tulis Tema]
 Link Repositori: https://github.com/[username]/game-arcade-ai
 Link Game Aktif (Pages): https://[username].github.io/game-arcade-ai/
 
-Status: Seluruh checklist (LocalStorage, SFX, & State Game) telah teruji lancar!</pre>
+Status: Semua checklist uji sudah lolos.</pre>
           </div>
 
           <!-- Rubrik Penilaian -->
-          <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl print-dark-fix">
+          <div class="md:col-span-5 bg-slate-950/60 border border-slate-800 p-4 rounded-2xl print-dark-fix">
             <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2 print-text-fix">
               <span>⭐</span> Rubrik Penilaian (Total: 100 Poin)
             </h3>
