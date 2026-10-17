@@ -24,7 +24,6 @@ Cukup klik ganda pada berkas **`index.html`** untuk membukanya di Google Chrome,
   - `[ Home ]` / `[ End ]`: Langsung ke slide pertama / terakhir.
   - `[ Esc ]`: Menutup pratinjau gambar zoom (lightbox) atau menu daftar slide.
 - **Tombol Salin Instan**:
-  - Salin perintah instalasi Windows & macOS.
   - Salin seluruh isi berkas `AGENTS.md` dengan satu klik.
   - Salin template prompt instruksi ke Hermes Agent.
 - **Zoom Tangkapan Layar**: Klik gambar tangkapan layar mana pun untuk memperbesar (*high-definition lightbox*).
